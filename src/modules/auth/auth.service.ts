@@ -23,12 +23,13 @@ const loginUser = async(payload : IloginUser) =>{
     }
 
     const jwtPayload = {
-         user : user.id,
+         id : user.id,
          name : user.name,
          email : user.email,
-         role : user.role ,
+         role : user.role,
          status : user.status
     }
+
 
     const accessToken = jwtUtils.createToken(
         jwtPayload, 
