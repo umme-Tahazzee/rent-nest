@@ -1,0 +1,23 @@
+model User {
+  id        String     @id @default(uuid())
+  name      String
+  email     String     @unique
+  password  String
+  role      Role       @default(TENANT)
+  phone     String?
+  status    UserStatus @default(ACTIVE)
+  isDeleted Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // as landlord
+  properties Property[] @relation("LandlordProperties")
+
+  // as tenant
+  rentalRequests RentalRequest[]
+  payments       Payment[]
+  reviews        Review[]
+
+  @@map("users")
+}
+                            
