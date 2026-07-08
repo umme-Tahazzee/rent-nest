@@ -9,6 +9,8 @@ import { globalError } from "./middleware/globalError";
 import { userRoutes } from "./modules/user/user.route";
 import { propertyRoutes } from "./modules/property/property.route";
 import { categoryRoutes } from "./modules/category/category.route";
+import { RentalRequestControllers } from "./modules/rentalRequest/rentalRequest.controller";
+import { RentalRequestRoutes } from "./modules/rentalRequest/rentalRequest.route";
 
 const app : Application = express()
 
@@ -32,7 +34,7 @@ app.use('/api/users', userRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/categories', categoryRoutes)
 app.use('/api/properties', propertyRoutes)
-
+app.use('/api/rentals', RentalRequestRoutes)
 
 
 app.use(notFound)

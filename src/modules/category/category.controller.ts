@@ -6,7 +6,7 @@ import   httpStatus  from "http-status";
 
 const createCategory = catchAsync(async(req:Request, res:Response, next:NextFunction)=>{
   const payload = req.body
-  console.log(payload, 'categoty')
+  
   const result = await categoryService.createCategoryFromDb(payload)
 
   sendResponse(res,{

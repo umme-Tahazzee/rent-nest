@@ -77,7 +77,7 @@ const deleteProperty = catchAsync(async(req:Request, res:Response, next:NextFunc
     const userId = req.user?.id as string
     const userRole = req.user?.role as Role
 
-    const result = propertyService.deletePropertyFromDb(id, userId, userRole)
+     await propertyService.deletePropertyFromDb(id, userId, userRole)
 
     sendResponse(res, {
     statusCode: httpStatus.OK,
