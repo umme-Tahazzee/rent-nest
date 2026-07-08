@@ -1,8 +1,8 @@
-import { Prisma } from "../../../generated/prisma/browser";
+import { Prisma, Role } from "../../../generated/prisma/browser";
 import { prisma } from "../../lib/prisma"
 import { ICreateProperty, TPaginationOptions, TPropertyFilterRequest } from "./property.interface"
 
-const createPropertyIntoDb = async (landlordId: string, payload: any) => {
+const createPropertyIntoDb = async (landlordId: string, payload: ICreateProperty) => {
 
      const category = await prisma.category.findUnique({
           where: { id: payload.categoryId },
@@ -64,7 +64,7 @@ const getAllPropertiesFromDb = async (
      // isDeleted properties never showcase
      andConditions.push({ isDeleted: false });
 
-     // searchTerm - title/description/city/address er moddhe search
+     // searchTerm - title/description/city/address 
      if (searchTerm) {
           andConditions.push({
                OR: propertySearchableFields.map((field) => ({
@@ -152,9 +152,61 @@ const getAllPropertiesFromDb = async (
      };
 };
 
+const getSinglePropertyFromDb = async (id: string) => {
+     const result = await prisma.property.findUnique({
+          where: { id }
+     })
+
+     if (!result) {
+          throw new Error("Property id is not found")
+     }
+
+     return result
+}
+
+const updatePropertyFromDb = async (id: string, userId: string, role: string, payload: ICreateProperty) => {
+
+     const property = await prisma.property.findFirst({ where: { id, isDeleted: false } });
+
+     if (!property) {
+          throw new Error("Property not found");
+     }
+     
+     if(role !== Role.ADMIN && property.landlordId !== userId){
+          
+           throw new Error("You can only update your own properties")
+     }
+     
+     return prisma.property.update({where:{id}, data:payload})
+
+
+}
+
+const deletePropertyFromDb = async (id: string, userId: string, role: string) => {
+
+     const property = await prisma.property.findFirst({ where: { id, isDeleted: false } });
+
+     if (!property) {
+          throw new Error("Property not found");
+     }
+     
+     if(role !== Role.ADMIN && property.landlordId !== userId){
+          
+           throw new Error("You can only delete your own properties")
+     }
+     
+     return prisma.property.delete({where:{id}})
+
+
+}
+
+
 
 
 export const propertyService = {
      createPropertyIntoDb,
-     getAllPropertiesFromDb
+     getAllPropertiesFromDb,
+     getSinglePropertyFromDb,
+     updatePropertyFromDb,
+     deletePropertyFromDb
 }
