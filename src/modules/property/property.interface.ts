@@ -8,3 +8,21 @@ export interface ICreateProperty {
   bedroom: number;
   bathroom: number;
 }
+
+export type TPropertyFilterRequest = {
+  searchTerm?: string;
+  city?: string;
+  categoryId?: string;
+  minPrice?: string;
+  maxPrice?: string;
+  bedroom?: string;
+  bathroom?:string
+  status?: string;
+};
+
+export type TPaginationOptions = {
+  page?: string;
+  limit?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+};
