@@ -8,4 +8,4 @@ const router = Router();
 router.post('/register',userController.createUser)
 router.get('/me', auth(Role.ADMIN, Role.LANDLORD, Role.TENANT), userController.getMyProfile)
 
-export const userRouters = router
+export const userRoutes = router
