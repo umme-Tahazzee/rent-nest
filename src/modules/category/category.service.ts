@@ -38,9 +38,46 @@ const getSingleCategoryFromDb = async (categoryId: string) => {
 
 }
 
+const getUpdateCategoryFromDb = async (categoryId: string, payload: any) => {
+    const category = await prisma.category.findUnique({
+        where: {
+            id: categoryId
+        }
+    })
+    if (!category) {
+        throw new Error("Category not found");
+    }
+
+    const update = await prisma.category.update({
+           where : {
+             id: categoryId
+           },
+           data: payload
+           
+    }) 
+
+    return update
+
+}
+
+const deleteCategoryFromDb = async(categoryId:string) => {
+    const category = await prisma.category.delete({
+        where: {
+            id: categoryId
+        }
+    })
+    if (!category) {
+        throw new Error("Category not found");
+    }
+
+    return category
+}
+
 
 export const categoryService = {
     createCategoryFromDb,
     getAllCategoriesFromDb,
-    getSingleCategoryFromDb
+    getSingleCategoryFromDb,
+    getUpdateCategoryFromDb,
+    deleteCategoryFromDb 
 }
