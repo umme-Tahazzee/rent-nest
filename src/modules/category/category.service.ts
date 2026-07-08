@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma"
 import { Icategory } from "./category.interface"
 
+
 const createCategoryFromDb = async (payload: Icategory) => {
     const isExist = await prisma.category.findUnique({
         where: { name: payload.name },
@@ -10,7 +11,6 @@ const createCategoryFromDb = async (payload: Icategory) => {
     const result = await prisma.category.create({ data: payload });
     return result;
 }
-
 
 const getAllCategoriesFromDb = async () => {
 
@@ -61,16 +61,26 @@ const getUpdateCategoryFromDb = async (categoryId: string, payload: any) => {
 }
 
 const deleteCategoryFromDb = async(categoryId:string) => {
-    const category = await prisma.category.delete({
+    const category = await prisma.category.findUnique({
         where: {
             id: categoryId
+        },
+        include : {
+             properties: true
         }
     })
     if (!category) {
         throw new Error("Category not found");
     }
+    
+    if(category.properties.length>0){
+         throw new Error("Cannot delete category that has properties attached")
+    }
+    const result = await prisma.category.delete({ where: { id: categoryId } });
+    return result;
 
-    return category
+
+    
 }
 
 
