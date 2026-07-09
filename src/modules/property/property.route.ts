@@ -16,16 +16,16 @@ router.patch('/:id', auth(Role.LANDLORD, Role.ADMIN),validateRequest(PropertyVal
 router.delete("/:id",auth(Role.ADMIN, Role.LANDLORD),propertyController.deleteProperty);
 
 
-router.get(
-  "/requests",
-  auth(Role.LANDLORD),
-  RentalRequestControllers.getLandlordRentalRequests
-);
+// router.get(
+//   "/requests",
+//   auth(Role.LANDLORD),
+//   RentalRequestControllers.getLandlordRentalRequests
+// );
 
-router.patch(
-  "/requests/:id",
-  auth(Role.LANDLORD),
-  RentalRequestControllers.updateRentalRequestStatus
-);
+// router.patch(
+//   "/requests/:id",
+//   auth(Role.LANDLORD),
+//   RentalRequestControllers.updateRentalRequestStatus
+// );
 
 export const propertyRoutes = router
