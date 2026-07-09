@@ -12,8 +12,8 @@ router.post(
   RentalRequestControllers.createRentalRequest
 );
 
-// Tenant - nijer requests dekhbe
-router.get("/", auth(Role.TENANT), RentalRequestControllers.getMyRentalRequests);
+
+router.get("/",  RentalRequestControllers.getMyRentalRequests);
 
 // Tenant / Landlord / Admin - single request details (access control service e handled)
 router.get(

@@ -2,7 +2,6 @@ import { Router } from "express"
 import { auth } from "../../middleware/auth"
 import { Role } from "../../../generated/prisma/enums"
 import { propertyController } from "./property.controller"
-import { RentalRequestControllers } from "../rentalRequest/rentalRequest.controller"
 import validateRequest from "../../middleware/validateRequest"
 import { PropertyValidations } from "./property.validation"
 
@@ -16,16 +15,5 @@ router.patch('/:id', auth(Role.LANDLORD, Role.ADMIN),validateRequest(PropertyVal
 router.delete("/:id",auth(Role.ADMIN, Role.LANDLORD),propertyController.deleteProperty);
 
 
-// router.get(
-//   "/requests",
-//   auth(Role.LANDLORD),
-//   RentalRequestControllers.getLandlordRentalRequests
-// );
-
-// router.patch(
-//   "/requests/:id",
-//   auth(Role.LANDLORD),
-//   RentalRequestControllers.updateRentalRequestStatus
-// );
 
 export const propertyRoutes = router
