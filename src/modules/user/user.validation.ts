@@ -1,5 +1,5 @@
 import * as yup from "yup";
-import { Role } from "../../generated/prisma/enums"; // tomar Role enum path onujayi
+import { Role } from "../../../generated/prisma/enums"; 
 
 const createUserValidationSchema = yup.object({
   body: yup.object({
@@ -20,12 +20,10 @@ const createUserValidationSchema = yup.object({
 
     phone: yup
       .string()
-      .required("Phone number is required")
       .matches(/^(?:\+?88)?01[3-9]\d{8}$/, "Please provide a valid phone number"),
 
     role: yup
       .mixed<Role>()
-      .oneOf(Object.values(Role), "Invalid role")
       .required("Role is required"),
   }),
 });

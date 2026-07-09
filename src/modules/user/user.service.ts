@@ -5,7 +5,7 @@ import config from "../../config"
 import { Role } from "../../../generated/prisma/enums"
 
 const registerUserIntoDb = async (payload: RegisterInterfacePayload) => {
-    const { name, email, password, role } = payload
+    const { name, email, password, phone, role } = payload
 
     const isUserExist = await prisma.user.findUnique({
         where: { email }
@@ -36,7 +36,8 @@ const registerUserIntoDb = async (payload: RegisterInterfacePayload) => {
             name,
             email,
             password: hashedPassword,
-            role: normalizedRole,   // ekhane already-normalized value jacche
+            phone,
+            role: normalizedRole,   
         },
         omit: {
             password: true

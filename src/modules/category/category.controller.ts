@@ -5,8 +5,9 @@ import { sendResponse } from "../utils/sendResponse";
 import   httpStatus  from "http-status";
 
 const createCategory = catchAsync(async(req:Request, res:Response, next:NextFunction)=>{
+    console.log(req.user?.role, "role")
   const payload = req.body
-  
+  console.log(payload)
   const result = await categoryService.createCategoryFromDb(payload)
 
   sendResponse(res,{

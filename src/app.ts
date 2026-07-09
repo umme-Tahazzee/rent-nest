@@ -11,6 +11,7 @@ import { propertyRoutes } from "./modules/property/property.route";
 import { categoryRoutes } from "./modules/category/category.route";
 import { RentalRequestControllers } from "./modules/rentalRequest/rentalRequest.controller";
 import { RentalRequestRoutes } from "./modules/rentalRequest/rentalRequest.route";
+import { reviewsRouter } from "./modules/review/review.route";
 
 const app : Application = express()
 
@@ -35,7 +36,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/categories', categoryRoutes)
 app.use('/api/properties', propertyRoutes)
 app.use('/api/rentals', RentalRequestRoutes)
-// app.use('api/reviews')
+app.use('/api/reviews', reviewsRouter)
 
 
 app.use(notFound)
