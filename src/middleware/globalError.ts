@@ -1,14 +1,25 @@
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
+import { ValidationError as YupValidationError } from "yup";
 import { Prisma } from "../../prisma/generated/prisma/client";
 
 export const globalError = (err: any, req: Request, res: Response, next: NextFunction) => {
 
-    let statusCode;
-    let errorMessage = err.message || "Something went wrong";
+    let statusCode: number = httpStatus.INTERNAL_SERVER_ERROR;
+    let errorMessage: string = err.message || "Something went wrong";
+    let errorMessages: { path: string; message: string }[] = [];
+
+    // ---------- Yup Validation Error ----------
+    if (err instanceof YupValidationError) {
+        statusCode = httpStatus.BAD_REQUEST;
+        errorMessages = err.inner.length
+            ? err.inner.map((e) => ({ path: e.path || "", message: e.message }))
+            : [{ path: err.path || "", message: err.message }];
+        errorMessage = errorMessages.map((e) => e.message).join(", ");
+    }
 
     // Prisma can't connect to DB / bad connection config
-    if (err instanceof Prisma.PrismaClientInitializationError) {
+    else if (err instanceof Prisma.PrismaClientInitializationError) {
         statusCode = httpStatus.BAD_REQUEST;
         errorMessage = "You have provided incorrect field type or missing field";
     }
@@ -62,12 +73,13 @@ export const globalError = (err: any, req: Request, res: Response, next: NextFun
         errorMessage = "Invalid JSON format in request";
     }
 
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+    res.status(statusCode).json({
         success: false,
-        StatusCodes: statusCode,
+        statusCode,
         errorCode: err.code || null,
         name: err.name,
         message: errorMessage,
-        error: err.stack
+        errorMessages,
+        error: process.env.NODE_ENV === "development" ? err.stack : undefined,
     });
 };
