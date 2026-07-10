@@ -13,6 +13,8 @@ import { RentalRequestControllers } from "./modules/rentalRequest/rentalRequest.
 import { RentalRequestRoutes } from "./modules/rentalRequest/rentalRequest.route";
 import { reviewsRouter } from "./modules/review/review.route";
 import { landlordRoutes } from "./modules/landlord/landlord.route";
+import { paymentRoutes } from "./modules/payment/payment.route";
+import { PaymentControllers } from "./modules/payment/payment.controller";
 
 const app : Application = express()
 
@@ -23,6 +25,13 @@ app.use(
         credentials: true,
     }),
 );
+
+app.post(
+    "/api/payments/webhook",
+    express.raw({ type: "application/json" }),
+    PaymentControllers.stripeWebhook
+);
+
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use(cookieParser())
@@ -39,6 +48,7 @@ app.use('/api/properties', propertyRoutes)
 app.use('/api/landlord', landlordRoutes)
 app.use('/api/rentals', RentalRequestRoutes)
 app.use('/api/reviews', reviewsRouter)
+app.use('/api/payments', paymentRoutes)
 
 
 app.use(notFound)
