@@ -4,7 +4,7 @@ import { propertyService } from "./property.service";
 import { sendResponse } from "../utils/sendResponse";
 import httpStatus from "http-status";
 import pick from "../utils/pick";
-import { Role } from "../../../generated/prisma/enums";
+import { Role } from "../../generated/prisma/enums";
 
 const createProperty = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 

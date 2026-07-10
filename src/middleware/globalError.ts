@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 import { ValidationError as YupValidationError } from "yup";
-import { Prisma } from "../../prisma/generated/prisma/client";
+import { Prisma } from "../generated/prisma/client";
+
 
 export const globalError = (err: any, req: Request, res: Response, next: NextFunction) => {
 

@@ -1,9 +1,10 @@
 import { Router } from "express"
 import { auth } from "../../middleware/auth"
-import { Role } from "../../../generated/prisma/enums"
+
 import { propertyController } from "./property.controller"
 import validateRequest from "../../middleware/validateRequest"
 import { PropertyValidations } from "./property.validation"
+import { Role } from "../../generated/prisma/enums"
 
 
 const router = Router()

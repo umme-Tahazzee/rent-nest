@@ -2,7 +2,8 @@ import bcrypt from "bcryptjs"
 import { prisma } from "../../lib/prisma"
 import { RegisterInterfacePayload } from "./user.interface"
 import config from "../../config"
-import { Role } from "../../../generated/prisma/enums"
+import { Role } from "../../generated/prisma/enums"
+
 
 const registerUserIntoDb = async (payload: RegisterInterfacePayload) => {
     const { name, email, password, phone, role } = payload

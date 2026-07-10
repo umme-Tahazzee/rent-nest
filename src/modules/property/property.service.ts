@@ -1,4 +1,6 @@
-import { Prisma, Role } from "../../../generated/prisma/browser";
+
+import { Prisma } from "../../generated/prisma/client";
+import { Role } from "../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma"
 import { ICreateProperty, TPaginationOptions, TPropertyFilterRequest } from "./property.interface"
 

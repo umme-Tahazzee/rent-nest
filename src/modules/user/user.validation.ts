@@ -1,5 +1,6 @@
 import * as yup from "yup";
-import { Role } from "../../../generated/prisma/enums"; 
+import { Role } from "../../generated/prisma/enums";
+
 
 const createUserValidationSchema = yup.object({
   body: yup.object({

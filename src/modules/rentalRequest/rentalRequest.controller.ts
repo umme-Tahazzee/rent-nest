@@ -3,7 +3,8 @@ import { Request, Response } from "express";
 import { catchAsync } from "../utils/catchAsync";
 import { RentalRequestServices } from "./rentalReq.service";
 import { sendResponse } from "../utils/sendResponse";
-import { Role } from "../../../generated/prisma/enums";
+import { Role } from "../../generated/prisma/enums";
+
 
 
 const createRentalRequest = catchAsync(async (req: Request, res: Response) => {
