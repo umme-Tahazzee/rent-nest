@@ -1,0 +1,8 @@
+Email : admin@gmail.com
+Password:  12345678
+
+vdo link : https://drive.google.com/file/d/1yQEa2Kt88EnoVK8zIYJJ7GQTdLpx7Y5u/view?usp=sharing
+github link : https://github.com/umme-Tahazzee/rent-nest
+live link : https://rent-nest-six.vercel.app/
+postman : https://cse262-5526374.postman.co/workspace/rent-nest~a3b149ea-5aef-466b-ad2a-1429fa684881/request/54817962-613ffe15-4f18-45d2-a71b-7963cb8172df?action=share&creator=54817962
+erd : https://drawsql.app/teams/tahazzee/diagrams/rent-nest
