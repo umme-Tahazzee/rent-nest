@@ -1,58 +1,241 @@
-# 🏠 RentNest — Rental Property Marketplace API
+# RentNest 🏠
 
-RentNest is a role-based backend API for a rental property marketplace. **Landlords** list and manage properties, **Tenants** browse listings, submit rental requests and pay rent online, and **Admins** oversee the platform.
+**Find & List Rental Properties with Ease**
 
-Built for **Apollo Level 2 Web Dev — Assignment 4 (B7A4)**.
+RentNest is a full-stack rental property marketplace backend API built with **Node.js, Express, TypeScript, and Prisma ORM**. Landlords can list properties and manage rental requests, tenants can browse listings, request rentals, and pay online via Stripe, and admins oversee the entire platform.
 
----
-
-## 📋 Table of Contents
-
-- [Overview](#-overview)
-- [Tech Stack](#️-tech-stack)
-- [Roles & Permissions](#-roles--permissions)
-- [Project Structure](#-project-structure)
-- [Database Schema (ERD)](#️-database-schema-erd)
-- [Getting Started](#-getting-started)
-- [Environment Variables](#-environment-variables)
-- [API Endpoints](#-api-endpoints)
-- [Error Response Format](#-error-response-format)
-- [Payment Flow (Stripe)](#-payment-flow-stripe)
-- [Known Limitations](#-known-limitations)
+This project was built for **Apollo Level 2 Web Dev — Assignment B7A4**.
 
 ---
 
-## 🔍 Overview
+## 📌 Project Links
 
-RentNest lets landlords list rental properties, tenants request to rent them, and — once a landlord approves a request — tenants pay securely through **Stripe Checkout**. The platform tracks the full lifecycle of a rental: browsing → requesting → approval → payment → review.
+| Resource | Link |
+|---|---|
+| GitHub Repository | https://github.com/umme-Tahazzee/rent-nest.git |
+| ERD (Database Diagram) | https://drawsql.app/teams/tahazzee/diagrams/rent-nest |
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer          | Technology                                   |
-| -------------- | --------------------------------------------- |
-| Runtime        | Node.js                                       |
-| Language       | TypeScript                                    |
-| Framework      | Express.js (v5)                               |
-| Database       | PostgreSQL                                    |
-| ORM            | Prisma ORM (v7, multi-file schema)            |
-| Auth           | JWT (access + refresh tokens), bcryptjs       |
-| Validation     | Yup                                           |
-| Payments       | Stripe Checkout + Webhooks                    |
-| Dev Tools      | tsx (dev server), tsc (build)                 |
+- **Runtime:** Node.js (ESM)
+- **Language:** TypeScript
+- **Framework:** Express 5
+- **Database:** PostgreSQL
+- **ORM:** Prisma (with `@prisma/adapter-pg`)
+- **Authentication:** JWT (access + refresh token)
+- **Password Hashing:** bcryptjs
+- **Validation:** Yup
+- **Payments:** Stripe (Checkout Sessions + Webhooks)
+- **Dev tooling:** tsx (watch mode), TypeScript compiler
 
 ---
 
 ## 👥 Roles & Permissions
 
-| Role         | Description                          | Key Permissions                                                      |
-| ------------ | ------------------------------------- | ---------------------------------------------------------------------- |
-| **Tenant**   | Users looking for rental properties   | Browse listings, submit rental requests, pay rent, leave reviews       |
-| **Landlord** | Property owners who list rentals      | Create/manage listings, approve/reject requests, view request history |
-| **Admin**    | Platform moderators                   | Manage categories, moderate properties, oversee the platform          |
+| Role | Description | Key Permissions |
+|---|---|---|
+| **Tenant** | Users looking for rental properties | Browse listings, submit rental requests, pay via Stripe, leave reviews, manage profile |
+| **Landlord** | Property owners who list rentals | Create/manage listings, approve/reject rental requests, view tenant history |
+| **Admin** | Platform moderators | Manage all users (ban/unban), oversee all listings & rental requests, manage categories |
 
-> Users select `TENANT` or `LANDLORD` during registration. The `ADMIN` role cannot be self-registered — see [Known Limitations](#-known-limitations) for how to provision one.
+> 💡 Users select their role (`TENANT` / `LANDLORD`) during registration. Admin accounts cannot be self-registered.
+
+---
+
+## 🔑 Test Credentials
+
+**Admin login:**
+
+```
+email:    admin@gmail.com
+password: 12345678
+```
+
+Use this account to test all `/api/admin/*` routes (user ban/unban, view all properties, view all rental requests).
+
+For tenant/landlord accounts, register new users via `POST /api/auth/register`.
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/umme-Tahazzee/rent-nest.git
+cd rent-nest
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure environment variables
+
+Create a `.env` file in the root directory (see [Environment Variables](#-environment-variables) below).
+
+### 4. Generate Prisma Client
+
+```bash
+npx prisma generate
+```
+
+### 5. Run database migrations
+
+```bash
+npx prisma migrate dev
+```
+
+### 6. Start the development server
+
+```bash
+npm run dev
+```
+
+The server will start on `http://localhost:5000` (or whatever `PORT` is set in `.env`).
+
+---
+
+## 🔐 Environment Variables
+
+Create a `.env` file with the following keys:
+
+```env
+PORT=5000
+APP_URL=http://localhost:3000
+
+DATABASE_URL="postgres://<user>:<password>@<host>:5432/<database>?sslmode=require"
+
+BCRYPT_SALT_ROUNDS=10
+
+JWT_ACCESS_SECRET=your_access_secret
+JWT_ACCESS_EXPIRES_IN=1d
+JWT_REFRESH_SECRET=your_refresh_secret
+JWT_REFRESH_EXPIRES_IN=7d
+
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_signing_secret
+```
+
+> ⚠️ Never commit your real `.env` file. Use your own test values for `DATABASE_URL`, JWT secrets, and Stripe keys.
+
+### Getting Stripe test keys
+
+1. Create a free account at [stripe.com](https://stripe.com).
+2. Go to **Developers → API keys** and copy the **Secret key** (starts with `sk_test_...`).
+3. For the webhook secret, either:
+   - Use the [Stripe CLI](https://stripe.com/docs/stripe-cli) locally: `stripe listen --forward-to localhost:5000/api/payments/webhook` — it will print a `whsec_...` value to use.
+   - Or create a webhook endpoint in the Stripe Dashboard pointing to your deployed URL + `/api/payments/webhook`.
+
+---
+
+## 📚 API Endpoints
+
+> ⚠️ All protected routes require a Bearer token: `Authorization: Bearer <access_token>` (obtained from the login endpoint).
+
+### Authentication
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/api/users/register` | Public | Register a new user (tenant/landlord) |
+| POST | `/api/auth/login` | Public | Login, returns access + refresh token |
+| GET | `/api/users/me` | Authenticated | Get current logged-in user's profile |
+
+### Categories
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| GET | `/api/categories` | Public | Get all property categories |
+| GET | `/api/categories/:id` | Public | Get single category |
+| POST | `/api/categories` | Admin | Create a new category |
+| PATCH | `/api/categories/:id` | Admin | Update a category |
+| DELETE | `/api/categories/:id` | Admin | Delete a category |
+
+### Properties
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| GET | `/api/properties` | Public | Get all properties (supports filtering & pagination — `searchTerm`, `city`, `minPrice`, `maxPrice`, `bedroom`, `bathroom`, `categoryId`, `status`, `page`, `limit`, `sortBy`, `sortOrder`) |
+| GET | `/api/properties/:id` | Public | Get property details |
+| POST | `/api/properties` | Landlord | Create a new property listing |
+| PATCH | `/api/properties/:id` | Landlord / Admin | Update a property listing |
+| DELETE | `/api/properties/:id` | Landlord / Admin | Delete a property listing |
+
+### Rental Requests
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/api/rentals` | Tenant | Submit a rental request for a property |
+| GET | `/api/rentals` | Authenticated | Get the logged-in user's rental requests |
+| GET | `/api/rentals/:id` | Tenant / Landlord / Admin | Get rental request details |
+
+### Landlord Management
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| GET | `/api/landlord/request` | Landlord | Get all rental requests for the landlord's properties |
+| POST | `/api/landlord/request/:id` | Landlord | Approve or reject a rental request |
+
+### Payments (Stripe)
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/api/payments/create` | Tenant | Create a Stripe checkout session for an approved rental request |
+| POST | `/api/payments/confirm` | Tenant | Manually verify/confirm a payment using the Stripe session ID (fallback for local testing without webhooks) |
+| POST | `/api/payments/webhook` | Stripe (server-to-server) | Stripe webhook listener — auto-confirms payment on `checkout.session.completed` |
+| GET | `/api/payments` | Tenant | Get the logged-in tenant's payment history |
+| GET | `/api/payments/:id` | Tenant / Landlord / Admin | Get a single payment's details |
+
+### Reviews
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/api/reviews` | Tenant | Leave a review after a completed rental |
+
+### Admin
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| GET | `/api/admin/users` | Admin | Get all users (filter by `searchTerm`, `role`, `status` + pagination) |
+| PATCH | `/api/admin/users/:id` | Admin | Ban/unban a user (`{ "status": "ACTIVE" }` or `"BLOCKED"`) |
+| GET | `/api/admin/properties` | Admin | Get all properties platform-wide (moderation view) |
+| GET | `/api/admin/rentals` | Admin | Get all rental requests platform-wide |
+
+---
+
+## 💳 Testing Stripe Payments
+
+1. Register/login as a tenant and submit a rental request via `POST /api/rentals`.
+2. Login as the landlord who owns that property and approve it via `POST /api/landlord/request/:id`.
+3. As the tenant, call `POST /api/payments/create` with `{ "rentalRequestId": "<id>" }`. This returns a `checkoutUrl`.
+4. Open the `checkoutUrl` in a browser and pay using a Stripe test card:
+
+   ```
+   Card number: 4242 4242 4242 4242
+   Expiry: any future date
+   CVC: any 3 digits
+   ```
+
+5. On success, Stripe redirects back and (if the webhook is running via Stripe CLI) the payment status updates to `PAID` automatically. If you're not running the webhook listener, call `POST /api/payments/confirm` with `{ "sessionId": "<session_id_from_checkoutUrl>" }` to manually verify and mark it as paid.
+
+---
+
+## 🗄️ Database Schema (Overview)
+
+Full schema and relationships are visualized in the ERD: **[View ERD on DrawSQL](https://drawsql.app/teams/tahazzee/diagrams/rent-nest)**
+
+Core tables:
+
+- **User** — auth details, role (`TENANT` / `LANDLORD` / `ADMIN`), status (`ACTIVE` / `BLOCKED`)
+- **Category** — property type categories (apartment, house, studio, etc.)
+- **Property** — rental listings linked to a landlord and category
+- **RentalRequest** — a tenant's request to rent a property, with status transitions (`PENDING` → `APPROVED`/`REJECTED`)
+- **Payment** — Stripe payment transactions linked 1:1 to a rental request
+- **Review** — tenant reviews left on properties
 
 ---
 
@@ -60,291 +243,27 @@ RentNest lets landlords list rental properties, tenants request to rent them, an
 
 ```
 src/
-├── app.ts                     # Express app & route mounting
-├── server.ts                  # Server bootstrap
-├── config/                    # Environment variable loader
-├── lib/
-│   ├── prisma.ts               # Prisma client (pg adapter)
-│   └── stripe.ts               # Stripe client
-├── middleware/
-│   ├── auth.ts                  # JWT verification + role guard
-│   ├── validateRequest.ts       # Yup schema validator
-│   ├── globalError.ts           # Centralized error handler
-│   └── not-found.ts             # 404 handler
-└── modules/
-    ├── auth/                    # Login
-    ├── user/                    # Register, profile
-    ├── category/                # Property categories (CRUD)
-    ├── property/                 # Property listings (CRUD, search & filter)
-    ├── landlord/                 # Landlord-specific request management
-    ├── rentalRequest/            # Tenant rental requests
-    ├── payment/                  # Stripe checkout, webhook, payment history
-    ├── review/                   # Tenant reviews
-    └── utils/                    # catchAsync, sendResponse, jwt, pick
-
-prisma/
-├── schema/                   # Multi-file Prisma schema (user, property, category,
-│                                rentalRequest, payment, review, enums)
-└── migrations/                # SQL migration history
+├── config/           # environment config
+├── lib/               # Prisma client, Stripe client
+├── middleware/        # auth, error handling, validation
+├── modules/
+│   ├── admin/
+│   ├── auth/
+│   ├── category/
+│   ├── landlord/
+│   ├── payment/
+│   ├── property/
+│   ├── rentalRequest/
+│   ├── review/
+│   ├── user/
+│   └── utils/         # catchAsync, sendResponse, pick
+├── app.ts
+└── server.ts
 ```
-
----
-
-## 🗺️ Database Schema (ERD)
-
-Full interactive ERD: **[drawSQL — RentNest](https://drawsql.app/teams/tahazzee/diagrams/rent-nest)**
-
-```mermaid
-erDiagram
-    User ||--o{ Property : "lists (as landlord)"
-    User ||--o{ RentalRequest : "submits (as tenant)"
-    User ||--o{ Payment : "makes (as tenant)"
-    User ||--o{ Review : "writes (as tenant)"
-
-    Category ||--o{ Property : "categorizes"
-
-    Property ||--o{ RentalRequest : "receives"
-    Property ||--o{ Review : "receives"
-
-    RentalRequest ||--|| Payment : "settled by"
-
-    User {
-        string id PK
-        string name
-        string email UK
-        string password
-        Role role
-        UserStatus status
-        boolean isDeleted
-    }
-
-    Category {
-        string id PK
-        string name UK
-        string description
-    }
-
-    Property {
-        string id PK
-        string landlordId FK
-        string categoryId FK
-        string title
-        string city
-        decimal price
-        int bedroom
-        int bathroom
-        PropertyStatus status
-        boolean isDeleted
-    }
-
-    RentalRequest {
-        string id PK
-        string tenantId FK
-        string propertyId FK
-        RentalRequestStatus status
-        datetime moveInDate
-    }
-
-    Payment {
-        string id PK
-        string rentalRequestId FK
-        string tenantId FK
-        decimal amount
-        PaymentMethod method
-        string transactionId UK
-        PaymentStatus status
-    }
-
-    Review {
-        string id PK
-        string tenantId FK
-        string propertyId FK
-        int rating
-        string comment
-    }
-```
-
----
-
-## 🚀 Getting Started
-
-### 1. Clone & install
-
-```bash
-git clone <your-repo-url>
-cd rentnest
-npm install
-```
-
-### 2. Configure environment
-
-Copy `.env.example` to `.env` and fill in your own values (see [Environment Variables](#-environment-variables)).
-
-```bash
-cp .env.example .env
-```
-
-### 3. Run database migrations
-
-```bash
-npx prisma migrate dev
-```
-
-### 4. Start the dev server
-
-```bash
-npm run dev
-```
-
-The API runs at `http://localhost:5000` by default (see `PORT` in `.env`).
-
-### 5. Build for production
-
-```bash
-npm run build
-node dist/server.js
-```
-
----
-
-## 🔐 Environment Variables
-
-| Variable                 | Description                                         |
-| ------------------------- | ---------------------------------------------------- |
-| `PORT`                    | Port the server listens on                           |
-| `APP_URL`                 | Frontend/client URL (used for CORS + Stripe redirects) |
-| `DATABASE_URL`            | PostgreSQL connection string                          |
-| `BCRYPT_SALT_ROUNDS`      | Salt rounds for password hashing                      |
-| `JWT_ACCESS_SECRET`       | Secret for signing access tokens                      |
-| `JWT_ACCESS_EXPIRES_IN`   | Access token lifetime (e.g. `1d`)                     |
-| `JWT_REFRESH_SECRET`      | Secret for signing refresh tokens                     |
-| `JWT_REFRESH_EXPIRES_IN`  | Refresh token lifetime (e.g. `7d`)                    |
-| `STRIPE_SECRET_KEY`       | Stripe secret API key                                 |
-| `STRIPE_PRICE_ID`         | (Optional) pre-defined Stripe price ID                |
-| `STRIPE_WEBHOOK_SECRET`   | Secret used to verify Stripe webhook signatures       |
-
-> ⚠️ Never commit real secrets. Rotate any key that has ever been shared or pushed to a public repository.
-
----
-
-## 📡 API Endpoints
-
-### Auth & Users
-
-| Method | Endpoint             | Access        | Description                    |
-| ------ | --------------------- | ------------- | -------------------------------- |
-| POST   | `/api/users/register`  | Public        | Register as tenant or landlord   |
-| GET    | `/api/users/me`        | Authenticated | Get logged-in user's profile     |
-| POST   | `/api/auth/login`      | Public        | Login, returns access & refresh tokens |
-
-### Categories
-
-| Method | Endpoint               | Access | Description             |
-| ------ | ------------------------ | ------ | -------------------------- |
-| GET    | `/api/categories`         | Public | List all categories        |
-| GET    | `/api/categories/:id`     | Public | Get a single category      |
-| POST   | `/api/categories`         | Admin  | Create a category           |
-| PATCH  | `/api/categories/:id`     | Admin  | Update a category           |
-| DELETE | `/api/categories/:id`     | Admin  | Delete a category           |
-
-### Properties
-
-| Method | Endpoint               | Access           | Description                                  |
-| ------ | ------------------------ | ---------------- | ----------------------------------------------- |
-| GET    | `/api/properties`         | Public           | List properties (search, filter, pagination)    |
-| GET    | `/api/properties/:id`     | Public           | Get property details                            |
-| POST   | `/api/properties`         | Landlord         | Create a property listing                       |
-| PATCH  | `/api/properties/:id`     | Landlord / Admin | Update a property listing                       |
-| DELETE | `/api/properties/:id`     | Landlord / Admin | Delete (soft-delete) a property listing         |
-
-`GET /api/properties` supports query params: `searchTerm`, `city`, `minPrice`, `maxPrice`, `bedroom`, `bathroom`, `categoryId`, `status`, `page`, `limit`, `sortBy`, `sortOrder`.
-
-### Rental Requests
-
-| Method | Endpoint            | Access                     | Description                          |
-| ------ | --------------------- | -------------------------- | ---------------------------------------- |
-| POST   | `/api/rentals`         | Tenant                     | Submit a rental request for a property   |
-| GET    | `/api/rentals`         | Tenant                     | Get my rental requests                    |
-| GET    | `/api/rentals/:id`     | Tenant / Landlord / Admin  | Get a single rental request (ownership checked) |
-
-### Landlord
-
-| Method | Endpoint                      | Access   | Description                                  |
-| ------ | -------------------------------- | -------- | ----------------------------------------------- |
-| GET    | `/api/landlord/request`           | Landlord | Get all rental requests for my properties       |
-| POST   | `/api/landlord/request/:id`       | Landlord | Approve or reject a rental request              |
-
-### Payments (Stripe)
-
-| Method | Endpoint                    | Access                    | Description                                 |
-| ------ | ------------------------------ | ------------------------- | ----------------------------------------------- |
-| POST   | `/api/payments/create`          | Tenant                    | Create a Stripe Checkout session for an approved request |
-| POST   | `/api/payments/confirm`         | Tenant                    | Manually verify a payment by session ID (fallback) |
-| POST   | `/api/payments/webhook`         | Stripe (server-to-server) | Stripe webhook — auto-confirms payment status |
-| GET    | `/api/payments`                 | Tenant                    | Get my payment history                          |
-| GET    | `/api/payments/:id`             | Tenant / Landlord / Admin | Get a single payment (ownership checked)        |
-
-### Reviews
-
-| Method | Endpoint         | Access | Description                                  |
-| ------ | ------------------ | ------ | ----------------------------------------------- |
-| POST   | `/api/reviews`       | Tenant | Leave a review (only after an approved rental)  |
-
----
-
-## ⚠️ Error Response Format
-
-All errors return a consistent JSON shape from the global error handler, with special handling for Yup validation errors and known Prisma error codes (`P2002` duplicate, `P2025` not found, `P2003` FK violation, etc.):
-
-```json
-{
-  "success": false,
-  "statusCode": 400,
-  "errorCode": "P2002",
-  "name": "PrismaClientKnownRequestError",
-  "message": "Duplicate value for field: email",
-  "errorMessages": [
-    { "path": "email", "message": "Duplicate value for field: email" }
-  ]
-}
-```
-
-Successful responses follow this shape:
-
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "Properties retrieved successfully",
-  "data": { }
-}
-```
-
----
-
-## 💳 Payment Flow (Stripe)
-
-1. Tenant submits a rental request → `POST /api/rentals`.
-2. Landlord approves it → `POST /api/landlord/request/:id`.
-3. Tenant creates a Stripe Checkout session → `POST /api/payments/create`. A `Payment` row is created with status `PENDING`.
-4. Tenant completes payment on the Stripe-hosted checkout page.
-5. Stripe confirms the payment one of two ways:
-   - **Webhook** (`POST /api/payments/webhook`) — Stripe calls this automatically; the signature is verified and the payment is marked `PAID`.
-   - **Manual confirm** (`POST /api/payments/confirm`) — a fallback for local development where Stripe can't reach your webhook URL (e.g. via the Stripe CLI or `ngrok`).
-
----
-
-## 📝 Known Limitations
-
-This section is intentionally kept so any future contributor knows what's left:
-
-- **Admin provisioning**: registration currently blocks creating an `ADMIN` user via the API. To get a working admin account, either seed one directly in the database (`role = 'ADMIN'`) or temporarily relax that check — a proper `prisma/seed.ts` script is recommended.
-- **Dedicated admin endpoints** (list/ban users, platform-wide property & rental overviews) are not yet implemented as a separate module — admin authorization currently only gates property/category management.
-- **API documentation** (Postman collection / Swagger) is maintained separately — see the link shared with this submission.
 
 ---
 
 ## 👩‍💻 Author
 
-**Umme Tahazzee** — Apollo Level 2 Web Dev, Assignment B7A4
-GitHub: [@umme-Tahazzee](https://github.com/umme-Tahazzee)
+**Umme Tahazzee**
+GitHub: [@umme-tahazzee](https://github.com/umme-tahazzee)
