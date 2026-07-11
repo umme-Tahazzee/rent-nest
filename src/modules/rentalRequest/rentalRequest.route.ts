@@ -16,7 +16,7 @@ router.post(
 
 router.get("/",  RentalRequestControllers.getMyRentalRequests);
 
-// Tenant / Landlord / Admin - single request details (access control service e handled)
+
 router.get(
   "/:id",
   auth(Role.ADMIN, Role.LANDLORD, Role.TENANT),
