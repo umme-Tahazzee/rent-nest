@@ -48,9 +48,9 @@ app.use('/api/categories', categoryRoutes)
 app.use('/api/properties', propertyRoutes)
 app.use('/api/landlord', landlordRoutes)
 app.use('/api/rentals', RentalRequestRoutes)
-app.use('/api/admin', adminRoutes)
 app.use('/api/payments', paymentRoutes)
 app.use('/api/reviews', reviewsRouter)
+app.use('/api/admin', adminRoutes)
 
 
 app.use(notFound)
