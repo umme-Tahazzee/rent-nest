@@ -4,7 +4,6 @@
 
 RentNest is a full-stack rental property marketplace backend API built with **Node.js, Express, TypeScript, and Prisma ORM**. Landlords can list properties and manage rental requests, tenants can browse listings, request rentals, and pay online via Stripe, and admins oversee the entire platform.
 
-This project was built for **Apollo Level 2 Web Dev — Assignment B7A4**.
 
 ---
 
