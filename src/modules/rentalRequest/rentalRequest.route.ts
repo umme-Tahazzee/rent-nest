@@ -14,7 +14,7 @@ router.post(
 );
 
 
-router.get("/",  RentalRequestControllers.getMyRentalRequests);
+router.get("/",auth(Role.TENANT),  RentalRequestControllers.getMyRentalRequests);
 
 
 router.get(
