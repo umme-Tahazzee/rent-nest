@@ -23,8 +23,8 @@ const createUserValidationSchema = yup.object({
       .string()
       .matches(/^(?:\+?88)?01[3-9]\d{8}$/, "Please provide a valid phone number"),
 
-    role: yup
-      .mixed<Role>()
+    // role: yup
+    //   .mixed<Role>()
       
   }),
 });
