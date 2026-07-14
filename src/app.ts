@@ -42,7 +42,7 @@ app.get("/", (req:Request,res:Response)=>{
 
 
 //all routes
-app.use('/api/auth', userRoutes)
+app.use('/api/users', userRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/categories', categoryRoutes)
 app.use('/api/properties', propertyRoutes)
