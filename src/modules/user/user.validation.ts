@@ -25,7 +25,7 @@ const createUserValidationSchema = yup.object({
 
     role: yup
       .mixed<Role>()
-      .required("Role is required"),
+      
   }),
 });
 

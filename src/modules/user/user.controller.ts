@@ -29,6 +29,7 @@ const getMyProfile = catchAsync(async (req: Request, res: Response) => {
 })
 
 
+
 export const userController = {
      createUser,
      getMyProfile
