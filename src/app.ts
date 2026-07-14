@@ -45,7 +45,7 @@ app.get("/", (req:Request,res:Response)=>{
 app.use('/api/users', userRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/categories', categoryRoutes)
-app.use('/api/properties', propertyRoutes)
+app.use('/api/landlord/properties', propertyRoutes)
 app.use('/api/landlord', landlordRoutes)
 app.use('/api/rentals', RentalRequestRoutes)
 app.use('/api/payments', paymentRoutes)
